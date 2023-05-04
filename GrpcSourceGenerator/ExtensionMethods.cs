@@ -24,6 +24,17 @@ internal static class ExtensionMethods
             .ToImmutableArray();
     }
 
+    public static ImmutableArray<PropertyDeclarationSyntax> GetProperties(this ClassDeclarationSyntax compilation)
+    {
+        // Get all properties.
+        var allNodes = compilation.DescendantNodes();
+        var allProperties = allNodes
+            .Where(d => d.IsKind(SyntaxKind.PropertyDeclaration))
+            .OfType<PropertyDeclarationSyntax>();
+
+        return allProperties.ToImmutableArray();
+    }
+
     public static ImmutableArray<ClassDeclarationSyntax> GetGrpcMessages(this Compilation compilation)
     {
         return GetClassesWithAttribute(compilation, GrpcMessageAttributeName);
@@ -34,9 +45,14 @@ internal static class ExtensionMethods
         return GetClassesWithAttribute(compilation, GrpcServiceAttributeName);
     }
 
-    private static bool IsPartial(this ClassDeclarationSyntax component)
+    private static bool IsPartial(this MemberDeclarationSyntax component)
     {
         return component.Modifiers.Any(SyntaxKind.PartialKeyword);
+    }
+
+    public static bool IsNullable(this PropertyDeclarationSyntax component)
+    {
+        return component.Type is NullableTypeSyntax;
     }
 
     private static bool HasAttribute(this ClassDeclarationSyntax component, string attributeName)
